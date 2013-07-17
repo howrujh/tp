@@ -8,17 +8,17 @@
 #include <string.h>
 #include <unistd.h>
 
-/* 색상 이름에 해당하는 픽셀값 반환하는 함수 */
+#include <pthread.h>
+#include <stdlib.h>
+
+
 unsigned long UsrColorPixel( Display*, char* );
-/* 요청을 플러쉬하고 지정된 초만큼 지연시키는 함수 */
-void    Pause( Display*, int );
+void Pause( Display*, int );
 
-static XPoint points[] = {{ 200, 50 },{ 100, 150 },{ 300, 150 },{ 200, 50 }};
-static XSegment segs[] = {{ 10, 10, 390, 190 },{ 10, 190, 390, 10 }};
-static char dash_list[] = { 20, 5, 10, 5 };
+static int kill_thread =0;
 
-int main()
-{
+void* thread_pattern_gen(void *data){
+
 	Display *dp;
 	Window mw; /* One TopLevel Window & Two Child Windows */
 	GC gc, gc_rect1, gc_rect2, gc_string;
@@ -62,7 +62,7 @@ int main()
 	xft  = XftFontOpenName( dp, 0, "Courier New-48:bold" ); 
 	if(!xft){
 		printf("font null\n");
-		return -1;
+		return 0;
 	}
 	xftdraw = XftDrawCreate(dp, mw, DefaultVisual(dp, 0), DefaultColormap(dp, 0));
 
@@ -82,6 +82,8 @@ int main()
 
 
 	while(1){
+		if(kill_thread) break;
+
 		int move;
 		for( move = 0; move < 30; move ++){
 			gettimeofday(&tv, NULL);
@@ -106,7 +108,7 @@ int main()
 	}
 
 
-	getchar();
+	printf("thread kill\n");
 
 	/* GC, 창 파괴 & 서버와의 접속 해제 */
 	XFreeGC( dp, gc );
@@ -121,7 +123,44 @@ int main()
 	XCloseDisplay( dp );
 
 	return 0;
+
+
 }
+
+
+int main()
+{
+	kill_thread = 0;
+	pthread_t thread_t;
+	int thread_ret;
+
+	if(pthread_create(&thread_t, NULL, thread_pattern_gen, NULL) < 0){
+		perror("thread create error:");
+		exit(0);
+	}
+
+	printf("=========");
+
+	while(1){
+		char input[100];
+		memcpy(input,0,sizeof(input));
+		scanf("%s", input);
+
+		if(strcmp(input, "exit")==0){
+			kill_thread= 1;
+			break;
+
+		}else if(strcmp(input, "exit")==0){
+		}else{
+
+		}
+
+	}
+	pthread_join(thread_t,(void**)&thread_ret);
+	printf("test pattern generator normally closed\n");
+	return 0;
+}
+				
 
 /*
  *

@@ -9,6 +9,7 @@ INCLUDE_DIR += -I/usr/include/freetype2
 LIB_DIR = -L$(PROJECT_BASE)/lib
 LIB_DIR += -lX11
 LIB_DIR += -lXft
+LIB_DIR += -lpthread
 
 
 
