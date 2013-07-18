@@ -139,11 +139,10 @@ int main()
 		exit(0);
 	}
 
-	printf("=========");
 
 	while(1){
 		char input[100];
-		memcpy(input,0,sizeof(input));
+		memset(input,0,sizeof(input));
 		scanf("%s", input);
 
 		if(strcmp(input, "exit")==0){
