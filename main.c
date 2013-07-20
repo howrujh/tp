@@ -20,6 +20,7 @@ static int kill_thread =0;
 void* thread_pattern_gen(void *data){
 
 	Display *dp;
+	Bool is_ntsc = (Bool)data;
 	Window mw; /* One TopLevel Window & Two Child Windows */
 	GC gc, gc_rect1, gc_rect2, gc_string;
 	XftFont *xft;
@@ -38,7 +39,7 @@ void* thread_pattern_gen(void *data){
 	/* 자, 시작해볼까요? */
 
 	mw = XCreateSimpleWindow ( dp, DefaultRootWindow( dp ),
-			0, 0, 720, 480, 0,
+			0, 0, 720, is_ntsc?480:576, 0,
 			WhitePixel(dp,0), BlackPixel(dp,0) );
 
 	xswa.override_redirect = True;
@@ -79,6 +80,11 @@ void* thread_pattern_gen(void *data){
 	char line1[40];
 	char line2[40];
 
+	int line1_y = is_ntsc? (480/2)-30 : (576/2)-30;
+	int line2_y = is_ntsc? (480/2)+30 : (576/2)+30;
+
+	int rect1_y = is_ntsc? 480/4 : 576/4;
+	int rect2_y = is_ntsc? (480/4)*3 : (576/4)*3;
 
 
 	while(1){
@@ -93,16 +99,16 @@ void* thread_pattern_gen(void *data){
 			XFlush(dp);
 			XClearWindow( dp, mw );
 
-			XFillRectangle ( dp, mw, gc_rect1, (move==0)? 0:(720/30)*move, 40, 100, 100);
+			XFillRectangle ( dp, mw, gc_rect1, (move==0)? 0:(720/30)*move, rect1_y, 50, 10);
 
-			XFillRectangle ( dp, mw, gc_rect2, (move==0)? 0:720-(720/30)*move, 340, 100, 100);
+			XFillRectangle ( dp, mw, gc_rect2, (move==0)? 0:720-(720/30)*move, rect2_y, 50, 10);
 
 
 			sprintf(line1," %04d/%02d/%02d ", ptm->tm_year+1900, ptm->tm_mon+1, ptm->tm_mday);
 
 			sprintf(line2,"%02d:%02d:%02d %02ld\"",ptm->tm_hour, ptm->tm_min, ptm->tm_sec, tv.tv_usec/33333);
-			XftDrawString8(xftdraw, &xftcolor, xft, 100, 220, (XftChar8 *)line1, strlen(line1));
-			XftDrawString8(xftdraw, &xftcolor, xft, 100, 280, (XftChar8 *)line2, strlen(line2));
+			XftDrawString8(xftdraw, &xftcolor, xft, 100, line1_y, (XftChar8 *)line1, 12);
+			XftDrawString8(xftdraw, &xftcolor, xft, 100, line2_y, (XftChar8 *)line2, 13);
 			usleep(33333);
 		}
 	}
@@ -128,13 +134,25 @@ void* thread_pattern_gen(void *data){
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
+	Bool vmode = 1;
+	
+	if(!(argc == 1 || argc ==2)){
+		return -1;
+	}
+
+	if(argc ==2 && strcmp(argv[1], "pal") ==0 ){
+		vmode =0;
+
+	}else{
+		vmode =1;
+	}
 	kill_thread = 0;
 	pthread_t thread_t;
 	int thread_ret;
 
-	if(pthread_create(&thread_t, NULL, thread_pattern_gen, NULL) < 0){
+	if(pthread_create(&thread_t, NULL, thread_pattern_gen, (void*)vmode) < 0){
 		perror("thread create error:");
 		exit(0);
 	}
