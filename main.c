@@ -74,6 +74,8 @@ void* thread_pattern_gen(void *data){
 
 
 
+	int frame_rate = is_ntsc? 30:25;
+	unsigned int div = is_ntsc? 33333: 40000;
 
 	char line1[40];
 	char line2[40];
@@ -89,7 +91,7 @@ void* thread_pattern_gen(void *data){
 		if(kill_thread) break;
 
 		int move;
-		for( move = 0; move < 30; move ++){
+		for( move = 0; move < frame_rate; move ++){
 			gettimeofday(&tv, NULL);
 			struct tm *ptm = localtime(&(tv.tv_sec));
 
@@ -104,10 +106,10 @@ void* thread_pattern_gen(void *data){
 
 			sprintf(line1," %04d/%02d/%02d ", ptm->tm_year+1900, ptm->tm_mon+1, ptm->tm_mday);
 
-			sprintf(line2,"%02d:%02d:%02d %02ld\'",ptm->tm_hour, ptm->tm_min, ptm->tm_sec, tv.tv_usec/33333);
+			sprintf(line2,"%02d:%02d:%02d %02ld\'",ptm->tm_hour, ptm->tm_min, ptm->tm_sec, tv.tv_usec/div);
 			XftDrawString8(xftdraw, &xftcolor, xft, 100, line1_y, (XftChar8 *)line1, 12);
 			XftDrawString8(xftdraw, &xftcolor, xft, 100, line2_y, (XftChar8 *)line2, 12);
-			usleep(33333);
+			usleep(div);
 		}
 	}
 
