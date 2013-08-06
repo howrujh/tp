@@ -36,8 +36,6 @@ void* thread_pattern_gen(void *data){
 	/* 서버와 접속하기 그리고 변수들을 초기화 */
 	dp = XOpenDisplay ( NULL );
 
-	/* 자, 시작해볼까요? */
-
 	mw = XCreateSimpleWindow ( dp, DefaultRootWindow( dp ),
 			0, 0, 720, is_ntsc?480:576, 0,
 			WhitePixel(dp,0), BlackPixel(dp,0) );
@@ -106,9 +104,9 @@ void* thread_pattern_gen(void *data){
 
 			sprintf(line1," %04d/%02d/%02d ", ptm->tm_year+1900, ptm->tm_mon+1, ptm->tm_mday);
 
-			sprintf(line2,"%02d:%02d:%02d %02ld\"",ptm->tm_hour, ptm->tm_min, ptm->tm_sec, tv.tv_usec/33333);
+			sprintf(line2,"%02d:%02d:%02d %02ld\'",ptm->tm_hour, ptm->tm_min, ptm->tm_sec, tv.tv_usec/33333);
 			XftDrawString8(xftdraw, &xftcolor, xft, 100, line1_y, (XftChar8 *)line1, 12);
-			XftDrawString8(xftdraw, &xftcolor, xft, 100, line2_y, (XftChar8 *)line2, 13);
+			XftDrawString8(xftdraw, &xftcolor, xft, 100, line2_y, (XftChar8 *)line2, 12);
 			usleep(33333);
 		}
 	}
